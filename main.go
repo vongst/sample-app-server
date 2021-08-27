@@ -27,7 +27,7 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 
-	jsonFilePath, _ := filepath.Abs("./data/data_6_out.json")
+	jsonFilePath, _ := filepath.Abs("./data/messages.2_out.json")
 
 	type Customer struct {
 		ID          int               `json:"id"`
