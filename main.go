@@ -56,6 +56,7 @@ func main() {
 	}
 
 	router.GET("/customers", func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 
 		// sort by descending user id
 		sort.SliceStable(data, func(i, j int) bool {
@@ -69,6 +70,8 @@ func main() {
 	})
 
 	router.GET("/customers/:uid", func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+
 		str_uid := c.Param("uid")
 		uid, err := strconv.Atoi(str_uid)
 
