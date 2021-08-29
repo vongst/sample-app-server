@@ -80,18 +80,18 @@ def get_attributes_dict(attr_arr: list) -> dict:
                 }
                 
                     
-            elif uid in attr:
-                for key in e["data"]:
+            # elif uid in attr:
+            #     for key in e["data"]:
 
-                    if key in attr[int(uid)]["attributes"]: 
-                        if e["timestamp"] > attr[int(uid)]["attr_last_updated"][key]: 
-                            attr[int(uid)]["attributes"][key] = e["data"][key]
-                            attr[int(uid)]["attr_last_updated"][key] = e["timestamp"]
+            #         if key in attr[int(uid)]["attributes"]: 
+            #             if e["timestamp"] > attr[int(uid)]["attr_last_updated"][key]: 
+            #                 attr[int(uid)]["attributes"][key] = e["data"][key]
+            #                 attr[int(uid)]["attr_last_updated"][key] = e["timestamp"]
 
-                        pass
-                    elif key not in key in attr[int(uid)]["attributes"]:
-                        attr[int(uid)]["attributes"][key] = e["data"][key]
-                        attr[int(uid)]["attr_last_updated"][key] = e["timestamp"]
+            #             pass
+            #         elif key not in key in attr[int(uid)]["attributes"]:
+            #             attr[int(uid)]["attributes"][key] = e["data"][key]
+            #             attr[int(uid)]["attr_last_updated"][key] = e["timestamp"]
 
 
     return attr
@@ -108,10 +108,10 @@ def format(attr: dict) -> dict:
     for uid in attr: 
         attr[uid]["id"] = int(uid)
         attr[uid]["last_updated"] = max(attr[uid]["attr_last_updated"].values())
-        try: 
-            del attr[uid]["attr_last_updated"]
-        except: 
-            pass
+        # try: 
+        #     del attr[uid]["attr_last_updated"]
+        # except: 
+        #     pass
         customers.append(attr[uid])
     
     return customers
