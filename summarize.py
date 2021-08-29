@@ -3,7 +3,7 @@ import ndjson
 import json
 from collections import defaultdict
 
-input_file_path  = "./data/data_6.data"
+input_file_path  = "./data/messages.7.data"
 
 # load from file-like objects
 with open(input_file_path) as f:
@@ -30,8 +30,8 @@ def get_events_dict(events_arr: list) -> dict:
     events = defaultdict(dict)
 
     for e in events_arr: 
-            uid = int(e["user_id"])
-
+        uid = int(e["user_id"])
+        
         if e["name"] not in events[uid]:
             events[uid][e["name"]] = 1
         else:
@@ -40,73 +40,53 @@ def get_events_dict(events_arr: list) -> dict:
     return events
 
 def get_attributes_dict(attr_arr: list) -> dict: 
-    attr = {}
+    attr = defaultdict(dict)
 
-    for e in attr_arr: 
-        if "user_id" in e:
-            uid = int(e["user_id"])
+    overlap = 0
+    no_overlap = 0
 
-            if uid not in attr: 
-
-                attributes = {}
-                last_updated = {}
-
-                for key in e["data"]:
-                    try :
-                        attributes[key] = e["data"][key]
-                        last_updated[key] = e["timestamp"]
-                        
-                    except KeyError as error:
-                        pass
-                        # print(error)
-
-                attr[int(uid)] = {
-                    "attributes": attributes,
-                    "attr_last_updated": last_updated
-                }
-                
-                    
-            # elif uid in attr:
-            #     for key in e["data"]:
-
-            #         if key in attr[int(uid)]["attributes"]: 
-            #             if e["timestamp"] > attr[int(uid)]["attr_last_updated"][key]: 
-            #                 attr[int(uid)]["attributes"][key] = e["data"][key]
-            #                 attr[int(uid)]["attr_last_updated"][key] = e["timestamp"]
-
-            #             pass
-            #         elif key not in key in attr[int(uid)]["attributes"]:
-            #             attr[int(uid)]["attributes"][key] = e["data"][key]
-            #             attr[int(uid)]["attr_last_updated"][key] = e["timestamp"]
+    for item in attr_arr: 
+        uid = int(item["user_id"])
 
 
+        if "attributes" not in attr[uid]:
+            attr[uid]["attributes"] = item["data"]
+            attr[uid]["timestamps"] = [item["timestamp"]]
+            no_overlap += 1
+        elif "attributes" in attr[uid]:
+            attr[uid]["attributes"].update(item["data"])
+            attr[uid]["timestamps"].append(item["timestamp"])
+            overlap += 1
+
+    print(len(attr_arr), no_overlap, overlap)
+    sum = 0
+    for user in attr: 
+        sum += len(attr[user]["timestamps"])
+        print(user, "Latest update: ", max(attr[user]["timestamps"]), "Total updates: ", len(attr[user]["timestamps"]))
+    
+    print(sum)
     return attr
 
-def merge_events_on_attr(attr: dict, events: dict) -> dict:
+def get_formatted(attr: dict, events: dict) -> dict:
+    customers = []
+
     for uid in events: 
         attr[uid]["events"] = events[uid]
-    
-    return attr
-    pass
-
-def format(attr: dict) -> dict:
-    customers = []
-    for uid in attr: 
         attr[uid]["id"] = int(uid)
-        attr[uid]["last_updated"] = max(attr[uid]["attr_last_updated"].values())
-        # try: 
-        #     del attr[uid]["attr_last_updated"]
-        # except: 
-        #     pass
+        attr[uid]["last_updated"] = int(attr[uid]["attributes"]["created_at"])
+
+        # print(len(attr[uid]["timestamps"]), max(attr[uid]["timestamps"]))
+
         customers.append(attr[uid])
     
     return customers
     pass
 
-attributes, events = attributes_events(data)
+attributes, events = split_attributes_and_events(data)
+
 events = get_events_dict(events)
 attr = get_attributes_dict(attributes)
-customers = merge_events_on_attr(attr, events)
 
-formatted = format(customers)
+print(events, attr)
+formatted = get_formatted(attr, events)
 write_to_json(formatted)

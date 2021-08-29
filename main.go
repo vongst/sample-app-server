@@ -27,7 +27,7 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 
-	jsonFilePath, _ := filepath.Abs("./data/messages.2_out.json")
+	jsonFilePath, _ := filepath.Abs("./data/out.json")
 
 	type Customer struct {
 		ID          int               `json:"id"`
@@ -64,6 +64,7 @@ func main() {
 		})
 
 		output, _ := json.Marshal(data)
+
 		s := string(output)
 
 		c.String(http.StatusOK, s)
