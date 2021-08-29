@@ -13,45 +13,31 @@ def write_to_json(content=""):
     with open(input_file_path + ".out", 'w', encoding='utf-8') as f:
         json.dump(content, f, ensure_ascii=False, indent=4)
 
-# convert to and from objects
-text = ndjson.dumps(data) # string
-data = ndjson.loads(text) # list
 
-def attributes_events(data: list) -> tuple:
-    attributes = []
-    events = []
+# Split initial ndjson file by event type
+# assuming 2 event types
+# remove any without user id
 
+def split_attributes_and_events(data: list) -> tuple:
+    attr, events = [], []
     for d in data: 
-        if d["type"] == "event":
-            events.append(d)
-        elif d["type"] == "attributes":
-            attributes.append(d)
+        if "user_id" in d:
+            (attr, events)[d["type"] == "event"].append(d)
 
-    return attributes, events
-    pass
+    return attr, events
 
 def get_events_dict(events_arr: list) -> dict: 
     events = defaultdict(dict)
-    count = 0
 
     for e in events_arr: 
-        if "user_id" in e:
             uid = int(e["user_id"])
 
-            if uid in events and e["name"] in events[int(uid)]:
-                events[int(uid)][e["name"]] += 1
-            else :
-                events[int(uid)][e["name"]] = 1 
+        if e["name"] not in events[uid]:
+            events[uid][e["name"]] = 1
+        else:
+            events[uid][e["name"]] += 1 
 
-            count += 1
-
-    # print("Input length:", len(events_arr))
-    # print("Output length:", count)
-    # print(events)
     return events
-    pass
-
-
 
 def get_attributes_dict(attr_arr: list) -> dict: 
     attr = {}
