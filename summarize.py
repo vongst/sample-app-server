@@ -2,15 +2,18 @@ from os import write
 import ndjson
 import json
 from collections import defaultdict
+import argparse
 
-input_file_path  = "./data/messages.7.data"
+parser = argparse.ArgumentParser()
+parser.add_argument("file", help="path to input ndjson file")
+args = parser.parse_args()
 
 # load from file-like objects
-with open(input_file_path) as f:
+with open(args.file) as f:
     data = ndjson.load(f)
 
 def write_to_json(content=""):
-    with open(input_file_path + ".out", 'w', encoding='utf-8') as f:
+    with open(args.file + ".out", 'w', encoding='utf-8') as f:
         json.dump(content, f, ensure_ascii=False, indent=4)
 
 
@@ -42,29 +45,16 @@ def get_events_dict(events_arr: list) -> dict:
 def get_attributes_dict(attr_arr: list) -> dict: 
     attr = defaultdict(dict)
 
-    overlap = 0
-    no_overlap = 0
-
     for item in attr_arr: 
         uid = int(item["user_id"])
-
 
         if "attributes" not in attr[uid]:
             attr[uid]["attributes"] = item["data"]
             attr[uid]["timestamps"] = [item["timestamp"]]
-            no_overlap += 1
         elif "attributes" in attr[uid]:
             attr[uid]["attributes"].update(item["data"])
             attr[uid]["timestamps"].append(item["timestamp"])
-            overlap += 1
 
-    print(len(attr_arr), no_overlap, overlap)
-    sum = 0
-    for user in attr: 
-        sum += len(attr[user]["timestamps"])
-        print(user, "Latest update: ", max(attr[user]["timestamps"]), "Total updates: ", len(attr[user]["timestamps"]))
-    
-    print(sum)
     return attr
 
 def get_formatted(attr: dict, events: dict) -> dict:
@@ -75,18 +65,13 @@ def get_formatted(attr: dict, events: dict) -> dict:
         attr[uid]["id"] = int(uid)
         attr[uid]["last_updated"] = int(attr[uid]["attributes"]["created_at"])
 
-        # print(len(attr[uid]["timestamps"]), max(attr[uid]["timestamps"]))
-
         customers.append(attr[uid])
     
     return customers
-    pass
 
 attributes, events = split_attributes_and_events(data)
 
 events = get_events_dict(events)
 attr = get_attributes_dict(attributes)
-
-print(events, attr)
 formatted = get_formatted(attr, events)
 write_to_json(formatted)
